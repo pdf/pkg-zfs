@@ -3,8 +3,73 @@ dnl # Default ZFS kernel configuration
 dnl #
 AC_DEFUN([ZFS_AC_CONFIG_KERNEL], [
 	ZFS_AC_KERNEL
-	ZFS_AC_SPL
 	ZFS_AC_KERNEL_CONFIG
+	SPL_AC_DEBUG_KMEM
+	SPL_AC_DEBUG_KMEM_TRACKING
+	SPL_AC_ATOMIC_SPINLOCK
+	SPL_AC_TYPE_ATOMIC64_CMPXCHG
+	SPL_AC_TYPE_ATOMIC64_XCHG
+	SPL_AC_TYPE_UINTPTR_T
+	SPL_AC_3ARGS_INIT_WORK
+	SPL_AC_2ARGS_REGISTER_SYSCTL
+	SPL_AC_SET_SHRINKER
+	SPL_AC_3ARGS_SHRINKER_CALLBACK
+	SPL_AC_PATH_IN_NAMEIDATA
+	SPL_AC_TASK_CURR
+	SPL_AC_CTL_UNNUMBERED
+	SPL_AC_CTL_NAME
+	SPL_AC_FLS64
+	SPL_AC_DEVICE_CREATE
+	SPL_AC_5ARGS_DEVICE_CREATE
+	SPL_AC_CLASS_DEVICE_CREATE
+	SPL_AC_SET_NORMALIZED_TIMESPEC_EXPORT
+	SPL_AC_SET_NORMALIZED_TIMESPEC_INLINE
+	SPL_AC_TIMESPEC_SUB
+	SPL_AC_INIT_UTSNAME
+	SPL_AC_FDTABLE_HEADER
+	SPL_AC_FILES_FDTABLE
+	SPL_AC_UACCESS_HEADER
+	SPL_AC_KMALLOC_NODE
+	SPL_AC_MONOTONIC_CLOCK
+	SPL_AC_INODE_I_MUTEX
+	SPL_AC_MUTEX_OWNER
+	SPL_AC_MUTEX_OWNER_TASK_STRUCT
+	SPL_AC_MUTEX_LOCK_NESTED
+	SPL_AC_3ARGS_ON_EACH_CPU
+	SPL_AC_KALLSYMS_LOOKUP_NAME
+	SPL_AC_GET_VMALLOC_INFO
+	SPL_AC_PGDAT_HELPERS
+	SPL_AC_FIRST_ONLINE_PGDAT
+	SPL_AC_NEXT_ONLINE_PGDAT
+	SPL_AC_NEXT_ZONE
+	SPL_AC_PGDAT_LIST
+	SPL_AC_GLOBAL_PAGE_STATE
+	SPL_AC_ZONE_STAT_ITEM_FREE
+	SPL_AC_ZONE_STAT_ITEM_INACTIVE
+	SPL_AC_ZONE_STAT_ITEM_ACTIVE
+	SPL_AC_GET_ZONE_COUNTS
+	SPL_AC_USER_PATH_DIR
+	SPL_AC_SET_FS_PWD
+	SPL_AC_2ARGS_SET_FS_PWD
+	SPL_AC_2ARGS_VFS_UNLINK
+	SPL_AC_4ARGS_VFS_RENAME
+	SPL_AC_VFS_FSYNC
+	SPL_AC_2ARGS_VFS_FSYNC
+	SPL_AC_FS_STRUCT_SPINLOCK
+	SPL_AC_CRED_STRUCT
+	SPL_AC_GROUPS_SEARCH
+	SPL_AC_PUT_TASK_STRUCT
+	SPL_AC_5ARGS_PROC_HANDLER
+	SPL_AC_KVASPRINTF
+	SPL_AC_EXPORTED_RWSEM_IS_LOCKED
+	SPL_AC_KERNEL_INVALIDATE_INODES
+	SPL_AC_KERNEL_2ARGS_INVALIDATE_INODES
+	SPL_AC_SHRINK_DCACHE_MEMORY
+	SPL_AC_SHRINK_ICACHE_MEMORY
+	SPL_AC_KERN_PATH_PARENT_HEADER
+	SPL_AC_KERN_PATH_PARENT_SYMBOL
+	SPL_AC_2ARGS_ZLIB_DEFLATE_WORKSPACESIZE
+	SPL_AC_SHRINK_CONTROL_STRUCT
 	ZFS_AC_KERNEL_BDEV_BLOCK_DEVICE_OPERATIONS
 	ZFS_AC_KERNEL_TYPE_FMODE_T
 	ZFS_AC_KERNEL_KOBJ_NAME_LEN
@@ -184,111 +249,6 @@ AC_DEFUN([ZFS_AC_KERNEL], [
 	AC_SUBST(LINUX_VERSION)
 
 	ZFS_AC_MODULE_SYMVERS
-])
-
-dnl #
-dnl # Detect name used for the additional SPL Module.symvers file.  If one
-dnl # does not exist this is likely because the SPL has been configured
-dnl # but not built.  To allow recursive builds a good guess is made as to
-dnl # what this file will be named based on what it is named in the kernel
-dnl # build products.  This file will first be used at link time so if
-dnl # the guess is wrong the build will fail then.  This unfortunately
-dnl # means the ZFS package does not contain a reliable mechanism to
-dnl # detect symbols exported by the SPL at configure time.
-dnl #
-AC_DEFUN([ZFS_AC_SPL_MODULE_SYMVERS], [
-	AC_MSG_CHECKING([spl file name for module symbols])
-	AS_IF([test -r $SPL_OBJ/Module.symvers], [
-		SPL_SYMBOLS=Module.symvers
-	], [test -r $SPL_OBJ/Modules.symvers], [
-		SPL_SYMBOLS=Modules.symvers
-	], [test -r $SPL_OBJ/module/Module.symvers], [
-		SPL_SYMBOLS=Module.symvers
-	], [test -r $SPL_OBJ/module/Modules.symvers], [
-		SPL_SYMBOLS=Modules.symvers
-	], [
-		SPL_SYMBOLS=$LINUX_SYMBOLS
-	])
-
-	AC_MSG_RESULT([$SPL_SYMBOLS])
-	AC_SUBST(SPL_SYMBOLS)
-])
-
-dnl #
-dnl # Detect the SPL module to be built against
-dnl #
-AC_DEFUN([ZFS_AC_SPL], [
-	AC_ARG_WITH([spl],
-		AS_HELP_STRING([--with-spl=PATH],
-		[Path to spl source]),
-		[splsrc="$withval"])
-
-	AC_ARG_WITH([spl-obj],
-		AS_HELP_STRING([--with-spl-obj=PATH],
-		[Path to spl build objects]),
-		[splbuild="$withval"])
-
-
-	AC_MSG_CHECKING([spl source directory])
-	AS_IF([test -z "$splsrc"], [
-		sourcelink=`ls -1d /usr/src/spl-*/${LINUX_VERSION} \
-		            2>/dev/null | tail -1`
-
-		AS_IF([test -z "$sourcelink" || test ! -e $sourcelink], [
-			sourcelink=../spl
-		])
-
-		AS_IF([test -e $sourcelink], [
-			splsrc=`readlink -f ${sourcelink}`
-		], [
-			AC_MSG_RESULT([Not found])
-			AC_MSG_ERROR([
-	*** Please make sure the spl devel package for your distribution
-	*** is installed then try again.  If that fails you can specify the
-	*** location of the spl source with the '--with-spl=PATH' option.])
-		])
-	], [
-		AS_IF([test "$splsrc" = "NONE"], [
-			splbuild=NONE
-			splsrcver=NONE
-		])
-	])
-
-	AC_MSG_RESULT([$splsrc])
-	AC_MSG_CHECKING([spl build directory])
-	AS_IF([test -z "$splbuild"], [
-		splbuild=${splsrc}
-	])
-	AC_MSG_RESULT([$splbuild])
-
-	AC_MSG_CHECKING([spl source version])
-	AS_IF([test -r $splbuild/spl_config.h &&
-		fgrep -q SPL_META_VERSION $splbuild/spl_config.h], [
-
-		splsrcver=`(echo "#include <spl_config.h>";
-		            echo "splsrcver=SPL_META_VERSION") |
-		            cpp -I $splbuild |
-		            grep "^splsrcver=" | cut -d \" -f 2`
-	])
-
-	AS_IF([test -z "$splsrcver"], [
-		AC_MSG_RESULT([Not found])
-		AC_MSG_ERROR([
-	*** Cannot determine the version of the spl source.
-	*** Please prepare the spl source before running this script])
-	])
-
-	AC_MSG_RESULT([$splsrcver])
-
-	SPL=${splsrc}
-	SPL_OBJ=${splbuild}
-	SPL_VERSION=${splsrcver}
-
-	AC_SUBST(SPL)
-	AC_SUBST(SPL_OBJ)
-	AC_SUBST(SPL_VERSION)
-
-	ZFS_AC_SPL_MODULE_SYMVERS
 ])
 
 dnl #

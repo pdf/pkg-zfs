@@ -2,8 +2,9 @@
 
 MODULES := splat
 EXTRA_CFLAGS = @KERNELCPPFLAGS@
+EXTRA_CFLAGS += -include @abs_top_builddir@/zfs_config.h
+EXTRA_CFLAGS += -I@abs_top_srcdir@/include.spl
 EXTRA_CFLAGS += -I@abs_top_srcdir@/include
-EXTRA_CFLAGS += -include @abs_top_builddir@/spl_config.h
 
 # Solaris Porting LAyer Tests
 obj-m := splat.o

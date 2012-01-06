@@ -65,6 +65,7 @@ AC_CONFIG_FILES([
 	man/Makefile
 	man/man8/Makefile
 	lib/Makefile
+	lib/libcommon/Makefile
 	lib/libspl/Makefile
 	lib/libspl/asm-generic/Makefile
 	lib/libspl/asm-i386/Makefile
@@ -97,7 +98,11 @@ AC_CONFIG_FILES([
 	cmd/zvol_id/Makefile
 	cmd/zpool_id/Makefile
 	cmd/sas_switch_id/Makefile
+	cmd/spl/Makefile
+	cmd/splat/Makefile
 	module/Makefile
+	module/spl/Makefile
+	module/splat/Makefile
 	module/avl/Makefile
 	module/nvpair/Makefile
 	module/unicode/Makefile
