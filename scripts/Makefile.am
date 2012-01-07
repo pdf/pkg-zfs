@@ -1,3 +1,4 @@
+EXTRA_DIST = check.sh
 SUBDIRS = zpool-config zpool-layout zpios-test zpios-profile
 
 pkglibexecdir = $(libexecdir)/@PACKAGE@
@@ -36,6 +37,7 @@ clean:
 	done
 
 check:
+	$(top_srcdir)/scripts/check.sh
 	@$(ZFS) -u
 	@echo
 	@echo -n "===================================="
