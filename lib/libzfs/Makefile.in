@@ -51,6 +51,12 @@ am__aclocal_m4_deps =  \
 	$(top_srcdir)/config/kernel-bio-rw-syncio.m4 \
 	$(top_srcdir)/config/kernel-blk-end-request.m4 \
 	$(top_srcdir)/config/kernel-blk-fetch-request.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-flush.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-io-opt.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-max-hw-sectors.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-max-segments.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-nonrot.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-physical-block-size.m4 \
 	$(top_srcdir)/config/kernel-blk-requeue-request.m4 \
 	$(top_srcdir)/config/kernel-blk-rq-bytes.m4 \
 	$(top_srcdir)/config/kernel-blk-rq-pos.m4 \
@@ -71,6 +77,8 @@ am__aclocal_m4_deps =  \
 	$(top_srcdir)/config/kernel-rq-is_sync.m4 \
 	$(top_srcdir)/config/kernel-security-inode-init.m4 \
 	$(top_srcdir)/config/kernel-set-nlink.m4 \
+	$(top_srcdir)/config/kernel-show-options.m4 \
+	$(top_srcdir)/config/kernel-shrink.m4 \
 	$(top_srcdir)/config/kernel-truncate-setsize.m4 \
 	$(top_srcdir)/config/kernel-xattr-handler.m4 \
 	$(top_srcdir)/config/kernel.m4 \
@@ -115,11 +123,8 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libzfs_la_DEPENDENCIES = $(top_builddir)/lib/libspl/libspl.la \
-	$(top_builddir)/lib/libefi/libefi.la \
+libzfs_la_DEPENDENCIES = $(top_builddir)/lib/libshare/libshare.la \
 	$(top_builddir)/lib/libnvpair/libnvpair.la \
-	$(top_builddir)/lib/libshare/libshare.la \
-	$(top_builddir)/lib/libuutil/libuutil.la \
 	$(top_builddir)/lib/libzpool/libzpool.la
 am_libzfs_la_OBJECTS = libzfs_changelist.lo libzfs_config.lo \
 	libzfs_dataset.lo libzfs_diff.lo libzfs_fru.lo libzfs_graph.lo \
@@ -346,14 +351,6 @@ AM_CFLAGS = -Wall -Wstrict-prototypes -fno-strict-aliasing \
 	-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
 	-DTEXT_DOMAIN=\"zfs-linux-user\"
 lib_LTLIBRARIES = libzfs.la
-libzfs_la_LIBADD = \
-	$(top_builddir)/lib/libspl/libspl.la \
-	$(top_builddir)/lib/libefi/libefi.la \
-	$(top_builddir)/lib/libnvpair/libnvpair.la \
-	$(top_builddir)/lib/libshare/libshare.la \
-	$(top_builddir)/lib/libuutil/libuutil.la \
-	$(top_builddir)/lib/libzpool/libzpool.la
-
 libzfs_la_SOURCES = \
 	$(top_srcdir)/lib/libzfs/libzfs_changelist.c \
 	$(top_srcdir)/lib/libzfs/libzfs_config.c \
@@ -368,7 +365,12 @@ libzfs_la_SOURCES = \
 	$(top_srcdir)/lib/libzfs/libzfs_status.c \
 	$(top_srcdir)/lib/libzfs/libzfs_util.c
 
-libzfs_la_LDFLAGS = -lm -ldl $(LIBSELINUX) -version-info 1:0:0
+libzfs_la_LIBADD = \
+	$(top_builddir)/lib/libshare/libshare.la \
+	$(top_builddir)/lib/libnvpair/libnvpair.la \
+	$(top_builddir)/lib/libzpool/libzpool.la
+
+libzfs_la_LDFLAGS = -lm -ldl -version-info 1:1:0 $(LIBSELINUX)
 all: all-am
 
 .SUFFIXES:

@@ -74,6 +74,12 @@ am__aclocal_m4_deps =  \
 	$(top_srcdir)/config/kernel-bio-rw-syncio.m4 \
 	$(top_srcdir)/config/kernel-blk-end-request.m4 \
 	$(top_srcdir)/config/kernel-blk-fetch-request.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-flush.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-io-opt.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-max-hw-sectors.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-max-segments.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-nonrot.m4 \
+	$(top_srcdir)/config/kernel-blk-queue-physical-block-size.m4 \
 	$(top_srcdir)/config/kernel-blk-requeue-request.m4 \
 	$(top_srcdir)/config/kernel-blk-rq-bytes.m4 \
 	$(top_srcdir)/config/kernel-blk-rq-pos.m4 \
@@ -94,6 +100,8 @@ am__aclocal_m4_deps =  \
 	$(top_srcdir)/config/kernel-rq-is_sync.m4 \
 	$(top_srcdir)/config/kernel-security-inode-init.m4 \
 	$(top_srcdir)/config/kernel-set-nlink.m4 \
+	$(top_srcdir)/config/kernel-show-options.m4 \
+	$(top_srcdir)/config/kernel-shrink.m4 \
 	$(top_srcdir)/config/kernel-truncate-setsize.m4 \
 	$(top_srcdir)/config/kernel-xattr-handler.m4 \
 	$(top_srcdir)/config/kernel.m4 \
@@ -1078,9 +1086,9 @@ distclean-local::
 		-type f -print | xargs $(RM)
 
 @CONFIG_KERNEL_TRUE@install-data-local:
-@CONFIG_KERNEL_TRUE@	destname=zfs-$(ZFS_META_VERSION)/$(LINUX_VERSION); \
-@CONFIG_KERNEL_TRUE@	instdest=$(DESTDIR)/usr/src/$$destname; \
-@CONFIG_KERNEL_TRUE@	echo "$(ZFS_META_VERSION)" >$$instdest/zfs.release; \
+@CONFIG_KERNEL_TRUE@	release=$(ZFS_META_VERSION)-$(ZFS_META_RELEASE); \
+@CONFIG_KERNEL_TRUE@	instdest=$(DESTDIR)/usr/src/zfs-$$release/$(LINUX_VERSION); \
+@CONFIG_KERNEL_TRUE@	echo "$$release" >$$instdest/zfs.release; \
 @CONFIG_KERNEL_TRUE@	for instfile in $(noinst_HEADERS) module/$(LINUX_SYMBOLS); do \
 @CONFIG_KERNEL_TRUE@		$(INSTALL) -D $$instfile $$instdest/$$instfile; \
 @CONFIG_KERNEL_TRUE@	done
